@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "lint:hbs": "ember-template-lint .",
+    "format:hbs": "prettier **/*.hbs --write"
+  }
+}

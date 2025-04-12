@@ -1,0 +1,17 @@
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+DATABASE_URL="mongodb+srv://zidanindratama03:rahasia123@cluster0.zr1igmg.mongodb.net/nestjs-auth?retryWrites=true&w=majority&appName=Cluster0"
+
+GOOGLE_CLIENT_ID=771597091498-bv8pidc49k47m27v01sh7oodb9vtjdvu.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+JWT_ACCESS_SECRET=a8958d787488f93bc5a4ae9472b85f510bb4731653b765013362099cb34ed1aadc4856fa4abd182f6955cde519186459dcc57b16b34ff0afc3231edf37236bb3
+JWT_REFRESH_SECRET=b5f5e26f21c745c0234e5dc5db877025e665800bf2f110b128d0e541760f7b9544854dcdc47315590f31ee23cec2ebd86c88cbc18dbee2f9953e85c031645eaf
+
+EMAIL_FROM=zidanindratama03@gmail.com
+EMAIL_PASSWORD=pivwkkxtlvxggoyl
+
