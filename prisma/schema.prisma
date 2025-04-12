@@ -27,6 +27,6 @@ model User {
 
 enum Role {
   ADMIN
-  HR
+  RECRUITER
   MAHASISWA
 }

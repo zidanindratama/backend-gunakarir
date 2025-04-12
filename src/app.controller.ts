@@ -18,10 +18,10 @@ export class AppController {
     return 'Hanya untuk admin';
   }
 
-  @Roles('ADMIN')
-  @Get('hr')
+  @Roles('Recruiter')
+  @Get('recruiter')
   getHRContent() {
-    return 'Hanya untuk HR/Admin';
+    return 'Hanya untuk Recruiter';
   }
 
   @Roles('MAHASISWA')

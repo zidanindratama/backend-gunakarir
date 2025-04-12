@@ -20,6 +20,7 @@ import { RegisterDto, SignInDto } from './dtos/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { setAuthCookies } from 'src/common/utils/cookie.util';
 
 @Controller('api/auth')
 export class AuthController {
@@ -36,13 +37,7 @@ export class AuthController {
     const user = req.user;
     const tokens = await this.authService.signin(user);
 
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
-      secure: process.env.NODE_ENV !== 'development',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
 
     return { accessToken: tokens.accessToken };
   }
@@ -58,13 +53,7 @@ export class AuthController {
 
     const tokens = await this.authService.signin(user);
 
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
-      secure: process.env.NODE_ENV !== 'development',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
 
     return { message: 'Registrasi berhasil', accessToken: tokens.accessToken };
   }
@@ -82,21 +71,7 @@ export class AuthController {
 
     const tokens = await this.authService.signin(user);
 
-    res.cookie('refresh_token', tokens.refreshToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
-      secure: process.env.NODE_ENV !== 'development',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.cookie('access_token', tokens.accessToken, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
-      secure: process.env.NODE_ENV !== 'development',
-      path: '/',
-      maxAge: 15 * 60 * 1000,
-    });
+    setAuthCookies(res, tokens);
 
     res.redirect(`http://localhost:3000`);
   }
@@ -155,8 +130,6 @@ export class AuthController {
 
   @Get('me')
   getMe(@Req() req: Request) {
-    console.log(req);
-
     return req.user;
   }
 }

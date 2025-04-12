@@ -20,6 +20,13 @@ export class AuthService {
       throw new HttpException('Email tidak ditemukan', HttpStatus.UNAUTHORIZED);
     }
 
+    if (!user.password) {
+      throw new HttpException(
+        'User menggunakan Google login',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new HttpException('Password salah', HttpStatus.UNAUTHORIZED);

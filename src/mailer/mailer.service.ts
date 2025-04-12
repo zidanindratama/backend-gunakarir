@@ -38,7 +38,7 @@ export class MailerService {
   ) {
     const html = this.compileTemplate(templateName, context);
     await this.transporter.sendMail({
-      from: `"NestJS Auth" <${process.env.EMAIL_FROM}>`,
+      from: `"GunaKarir" <${process.env.EMAIL_FROM}>`,
       to,
       subject,
       html,
