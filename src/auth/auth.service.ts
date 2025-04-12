@@ -32,13 +32,31 @@ export class AuthService {
     const email = profile.emails[0].value;
     const imageUrl = profile.photos?.[0]?.value || '';
 
-    const user = await this.prismaService.user.findUnique({ where: { email } });
+    const baseUsername = profile.displayName.replace(/\s+/g, '');
+    let username = baseUsername;
 
-    if (user) return user;
+    const existingUser = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) return existingUser;
+
+    let isUsernameTaken = await this.prismaService.user.findUnique({
+      where: { username },
+    });
+
+    let count = 1;
+    while (isUsernameTaken) {
+      username = `${baseUsername}_${count}`;
+      isUsernameTaken = await this.prismaService.user.findUnique({
+        where: { username },
+      });
+      count++;
+    }
 
     const newUser = await this.prismaService.user.create({
       data: {
-        username: profile.displayName,
+        username,
         email,
         password: '',
         role: 'MAHASISWA',
