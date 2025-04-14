@@ -1,7 +1,7 @@
 import { Controller, Get, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { AppService } from './app.service';
-import { Roles } from './auth/decorators/roles.decorator';
+import { Roles } from './common/decorators/roles.decorator';
 
 @Controller()
 export class AppController {
@@ -18,7 +18,7 @@ export class AppController {
     return 'Hanya untuk admin';
   }
 
-  @Roles('Recruiter')
+  @Roles('RECRUITER')
   @Get('recruiter')
   getHRContent() {
     return 'Hanya untuk Recruiter';

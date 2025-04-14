@@ -1,17 +1,14 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { RolesGuard } from './auth/guards/roles.guard';
+import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
+
   const whitelist = ['http://localhost:3000'];
-
-  const reflector = app.get(Reflector);
-
-  app.useGlobalGuards(new JwtAuthGuard(reflector), new RolesGuard(reflector));
 
   app.enableCors({
     origin: whitelist,

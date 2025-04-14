@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { MailerModule } from './mailer/mailer.module';
 import { UploadModule } from './upload/upload.module';
+import { RecruitersModule } from './recruiters/recruiters.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UploadModule } from './upload/upload.module';
     PrismaModule,
     MailerModule,
     UploadModule,
+    RecruitersModule,
   ],
   controllers: [AppController],
   providers: [

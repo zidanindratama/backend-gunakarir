@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^10.4.15",
     "@prisma/client": "^6.5.0",
     "bcrypt": "^5.1.1",
+    "bson": "^6.10.3",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "ember-template-lint-plugin-prettier": "^5.0.0",

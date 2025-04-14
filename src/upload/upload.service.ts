@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { v2 as CloudinaryType, UploadApiResponse } from 'cloudinary';
-import { CLOUDINARY } from 'src/constants/cloudinary.constants';
+import { CLOUDINARY } from '../common/constants/data.constant';
 
 @Injectable()
 export class UploadService {

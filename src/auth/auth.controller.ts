@@ -20,12 +20,14 @@ import { RegisterDto, SignInDto } from './dtos/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { Public } from '../common/decorators/public.decorator';
-import { setAuthCookies } from 'src/common/utils/cookie.util';
+import { setAuthCookies } from '../common/utils/cookie.util';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('api/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
 
@@ -37,9 +39,20 @@ export class AuthController {
     const user = req.user;
     const tokens = await this.authService.signin(user);
 
+    const isRecruiterExist = await this.prismaService.recruiter.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
+
     setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
 
-    return { accessToken: tokens.accessToken };
+    let redirectUrl = '/dashboard';
+    if (user.role === 'RECRUITER' && isRecruiterExist === null) {
+      redirectUrl = '/dashboard/recruiter-request';
+    }
+
+    return { accessToken: tokens.accessToken, redirectUrl };
   }
 
   @Public()
@@ -50,12 +63,26 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = await this.authService.signup(body);
-
     const tokens = await this.authService.signin(user);
+
+    const isRecruiterExist = await this.prismaService.recruiter.findUnique({
+      where: {
+        userId: user.id,
+      },
+    });
 
     setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
 
-    return { message: 'Registrasi berhasil', accessToken: tokens.accessToken };
+    let redirectUrl = '/dashboard';
+    if (user.role === 'RECRUITER' && isRecruiterExist === null) {
+      redirectUrl = '/dashboard/recruiter-request';
+    }
+
+    return {
+      message: 'Registrasi berhasil',
+      accessToken: tokens.accessToken,
+      redirectUrl, // kasih tau frontend mau redirect ke mana
+    };
   }
 
   @Public()
@@ -76,8 +103,8 @@ export class AuthController {
     res.redirect(`http://localhost:3000`);
   }
 
-  @Delete('signout')
   @Public()
+  @Delete('signout')
   signout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     res.clearCookie('refresh_token', {
       httpOnly: true,

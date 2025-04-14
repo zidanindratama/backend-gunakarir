@@ -83,13 +83,30 @@ export class AuthService {
       throw new HttpException('Email sudah terdaftar', HttpStatus.BAD_REQUEST);
     }
 
+    const baseUsername = data.username.replace(/\s+/g, '');
+    let username = baseUsername;
+
+    let isUsernameTaken = await this.prismaService.user.findUnique({
+      where: { username },
+    });
+
+    let count = 1;
+    while (isUsernameTaken) {
+      username = `${baseUsername}_${count}`;
+      isUsernameTaken = await this.prismaService.user.findUnique({
+        where: { username },
+      });
+      count++;
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const user = await this.prismaService.user.create({
       data: {
-        username: data.username,
+        username: username,
         email: data.email,
         password: hashedPassword,
-        role: 'MAHASISWA',
+        role: data.role,
       },
     });
 

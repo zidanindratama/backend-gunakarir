@@ -14,6 +14,7 @@ export const RegisterSchema = z
   .object({
     username: z.string().min(3, 'Username minimal 3 karakter'),
     email: z.string().email('Format email tidak valid'),
+    role: z.enum(['MAHASISWA', 'RECRUITER']).default('MAHASISWA'),
     password: z.string().min(6, 'Password minimal 6 karakter'),
     confirmPassword: z
       .string()
