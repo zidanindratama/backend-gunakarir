@@ -35,6 +35,7 @@ model Mahasiswa {
   phone_number  String
   linkedin_url  String?
   instagram_url String?
+  status        Status  @default(PENDING)
 
   province_id String
   city_id     String
