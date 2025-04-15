@@ -79,7 +79,7 @@ model Otp {
   user    User   @relation(fields: [user_id], references: [id])
 
   otp_code   String
-  purpose    String // e.g., "UPDATE_RECRUITER_DATA"
+  purpose    String
   expires_at DateTime
   used       Boolean  @default(false)
 
