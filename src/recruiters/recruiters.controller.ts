@@ -9,13 +9,13 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { RecruiterRequestDto } from './dtos/recruiter-request.dto';
 import { RecruitersService } from './recruiters.service';
-import { BypassApproval } from '../common/decorators/bypass-approval.decorator';
 import { AdminReviewDto } from './dtos/admin-review.dto';
-import { Roles } from '../common/decorators/roles.decorator';
+import { RecruiterRequestDto } from './dtos/recruiter-request.dto';
 import { RecruiterFilterDto } from './dtos/recruiter-filter.dto';
-import { Public } from 'src/common/decorators/public.decorator';
+import { BypassApproval } from '../common/decorators/bypass-approval.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('api/recruiters')
 export class RecruitersController {
@@ -52,6 +52,14 @@ export class RecruitersController {
     return this.recruitersService.recruiterRequestAppeal(user.id, dto);
   }
 
+  @Roles('RECRUITER')
+  @BypassApproval()
+  @Post('update-otp-request')
+  async requestUpdateOtp(@Req() req: Request) {
+    const user = req.user;
+    return this.recruitersService.sendUpdateOtp(user.id);
+  }
+
   @Roles('ADMIN')
   @Patch('review/:recruiterId')
   async reviewRequest(
@@ -59,5 +67,30 @@ export class RecruitersController {
     @Body() dto: AdminReviewDto,
   ) {
     return this.recruitersService.reviewRecruiterRequest(recruiterId, dto);
+  }
+
+  @Roles('RECRUITER')
+  @BypassApproval()
+  @Patch('update-pending')
+  async updatePendingRecruiter(
+    @Req() req: Request,
+    @Body() dto: Partial<RecruiterRequestDto>,
+  ) {
+    const user = req.user;
+    return this.recruitersService.updateRecruiterWhilePending(user.id, dto);
+  }
+
+  @Roles('RECRUITER')
+  @Patch('update-approved')
+  async updateApprovedRecruiter(
+    @Req() req: Request,
+    @Body() body: { data: Partial<RecruiterRequestDto>; otp: string },
+  ) {
+    const user = req.user;
+    return this.recruitersService.updateRecruiterWithOtp(
+      user.id,
+      body.otp,
+      body.data,
+    );
   }
 }

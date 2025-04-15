@@ -14,6 +14,14 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    if (exception instanceof Prisma.PrismaClientValidationError) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: exception.message,
+        error: 'Bad Request',
+      });
+    }
+
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       let message = 'Terjadi kesalahan pada database';
       let statusCode = HttpStatus.BAD_REQUEST;
@@ -21,7 +29,6 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
       if (exception.code === 'P2002') {
         const target = exception.meta?.target;
         const rawField = Array.isArray(target) ? target[0] : String(target);
-
         const match = rawField.match(/_(.*?)_key$/);
         const fieldName = match ? match[1] : rawField;
 

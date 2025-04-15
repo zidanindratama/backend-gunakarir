@@ -1,10 +1,10 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { RecruiterRequestDto } from './dtos/recruiter-request.dto';
 import { AdminReviewDto } from './dtos/admin-review.dto';
 import { RecruiterFilterDto } from './dtos/recruiter-filter.dto';
 import { MailerService } from '../mailer/mailer.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RecruitersService {
@@ -197,5 +197,114 @@ export class RecruitersService {
     );
 
     return reviewRecruiter;
+  }
+
+  async sendUpdateOtp(userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: {
+        recruiter: {
+          select: {
+            company_name: true,
+          },
+        },
+      },
+    });
+
+    if (!user) throw new ForbiddenException('User tidak ditemukan');
+
+    const existingOtp = await this.prismaService.otp.findFirst({
+      where: {
+        user_id: userId,
+        purpose: 'EDIT_RECRUITER',
+        used: false,
+        expires_at: { gt: new Date() },
+      },
+    });
+
+    if (existingOtp) {
+      throw new ForbiddenException(
+        'OTP masih aktif, silakan cek email Anda atau tunggu beberapa saat.',
+      );
+    }
+
+    const otp_code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await this.prismaService.otp.create({
+      data: {
+        user_id: userId,
+        otp_code,
+        purpose: 'EDIT_RECRUITER',
+        expires_at: new Date(Date.now() + 10 * 60 * 1000), // 10 menit
+      },
+    });
+
+    await this.mailerService.sendMailWithTemplate(
+      user.email,
+      'Kode OTP',
+      'otp-edit-recruiter',
+      {
+        otp_code: otp_code.split(''),
+        company_name: user.recruiter?.company_name ?? 'Perusahaan Anda',
+      },
+    );
+
+    return { message: 'OTP telah dikirim ke email Anda' };
+  }
+
+  async updateRecruiterWhilePending(
+    userId: string,
+    data: Partial<RecruiterRequestDto>,
+  ) {
+    const recruiter = await this.prismaService.recruiter.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!recruiter) {
+      throw new ForbiddenException('Recruiter tidak ditemukan.');
+    }
+
+    if (recruiter.status !== 'PENDING') {
+      throw new ForbiddenException('Hanya bisa mengedit saat status PENDING.');
+    }
+
+    return this.prismaService.recruiter.update({
+      where: { user_id: userId },
+      data,
+    });
+  }
+
+  async updateRecruiterWithOtp(
+    userId: string,
+    otp: string,
+    data: Partial<RecruiterRequestDto>,
+  ) {
+    const otpRecord = await this.prismaService.otp.findFirst({
+      where: {
+        user_id: userId,
+        otp_code: otp,
+        purpose: 'EDIT_RECRUITER',
+        expires_at: { gt: new Date() },
+        used: false,
+      },
+    });
+
+    if (!otpRecord) {
+      throw new ForbiddenException('OTP tidak valid atau sudah kedaluwarsa.');
+    }
+
+    const updatedRecruiter = await this.prismaService.recruiter.update({
+      where: { user_id: userId },
+      data,
+    });
+
+    await this.prismaService.otp.deleteMany({
+      where: {
+        user_id: userId,
+        purpose: 'EDIT_RECRUITER',
+      },
+    });
+
+    return updatedRecruiter;
   }
 }
