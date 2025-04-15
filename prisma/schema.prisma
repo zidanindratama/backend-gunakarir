@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  email    String  @unique
-  username String  @unique
-  password String?
-  imageUrl String?
-  role     Role    @default(MAHASISWA)
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  email     String  @unique
+  username  String  @unique
+  password  String?
+  image_url String?
+  role      Role    @default(MAHASISWA)
 
   mahasiswa Mahasiswa?
   recruiter Recruiter?
@@ -23,31 +23,52 @@ model User {
 }
 
 model Mahasiswa {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @unique @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user_id String @unique @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id])
 
-  namaLengkap String
-  nim         String
+  NPM           String
+  CV_file       String
+  KTM_file      String
+  fullname      String
+  address       String
+  phone_number  String
+  linkedin_url  String?
+  instagram_url String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  province_id String
+  city_id     String
+  district_id String
+  village_id  String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Recruiter {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @unique @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user_id String @unique @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id])
 
-  company         String
-  contract        String
-  NPWP            String  @unique
-  status          Status  @default(PENDING)
-  linkedin        String?
-  rejectionReason String?
+  NPWP                String  @unique
+  company_name        String
+  company_logo        String
+  company_description String
+  contract_file       String
+  address             String
+  phone_number        String
+  linkedin_url        String?
+  instagram_url       String?
+  rejection_reason    String?
+  status              Status  @default(PENDING)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  province_id String
+  city_id     String
+  district_id String
+  village_id  String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 enum Role {

@@ -41,7 +41,7 @@ export class AuthController {
 
     const isRecruiterExist = await this.prismaService.recruiter.findUnique({
       where: {
-        userId: user.id,
+        user_id: user.id,
       },
     });
 
@@ -67,7 +67,7 @@ export class AuthController {
 
     const isRecruiterExist = await this.prismaService.recruiter.findUnique({
       where: {
-        userId: user.id,
+        user_id: user.id,
       },
     });
 
@@ -81,7 +81,7 @@ export class AuthController {
     return {
       message: 'Registrasi berhasil',
       accessToken: tokens.accessToken,
-      redirectUrl, // kasih tau frontend mau redirect ke mana
+      redirectUrl,
     };
   }
 

@@ -17,6 +17,12 @@ export class MailerService {
     },
   });
 
+  constructor() {
+    handlebars.registerHelper('eq', function (a, b, options) {
+      return a === b ? options.fn(this) : options.inverse(this);
+    });
+  }
+
   private compileTemplate(templateName: string, context: any) {
     const filePath = path.join(
       __dirname,

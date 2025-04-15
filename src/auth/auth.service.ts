@@ -67,7 +67,7 @@ export class AuthService {
         email,
         password: '',
         role: 'MAHASISWA',
-        imageUrl,
+        image_url: imageUrl,
       },
     });
 
@@ -158,12 +158,12 @@ export class AuthService {
       );
     }
 
-    const isMatch = await bcrypt.compare(payload.oldPassword, user.password);
+    const isMatch = await bcrypt.compare(payload.old_password, user.password);
     if (!isMatch) {
       throw new HttpException('Password lama salah', HttpStatus.BAD_REQUEST);
     }
 
-    const hashedPassword = await bcrypt.hash(payload.newPassword, 10);
+    const hashedPassword = await bcrypt.hash(payload.new_password, 10);
 
     await this.prismaService.user.update({
       where: { id: userId },

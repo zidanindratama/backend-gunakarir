@@ -6,7 +6,7 @@ export const validateApprovedRecruiter = async (
   prisma: PrismaService,
 ) => {
   const recruiter = await prisma.recruiter.findUnique({
-    where: { userId },
+    where: { user_id: userId },
   });
 
   if (!recruiter) {

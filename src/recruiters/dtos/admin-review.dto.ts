@@ -4,10 +4,10 @@ import { createZodDto } from 'nestjs-zod';
 export const AdminReviewSchema = z
   .object({
     status: z.enum(['APPROVED', 'REJECTED']),
-    rejectionReason: z.string().optional(),
+    rejection_reason: z.string().optional(),
   })
   .refine(
-    (data) => data.status !== 'REJECTED' || !!data.rejectionReason?.trim(),
+    (data) => data.status !== 'REJECTED' || !!data.rejection_reason?.trim(),
     {
       message: 'Alasan penolakan wajib diisi jika status REJECTED',
       path: ['rejectionReason'],

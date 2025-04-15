@@ -1,0 +1,99 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Welcome to GunaKarir</title>
+    <link rel='preconnect' href='https://fonts.googleapis.com' />
+    <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+  </head>
+  <body
+    style="margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; background-color: white; color: #16325C; word-wrap: break-word; overflow-wrap: break-word;"
+  >
+    <!-- Header -->
+    <div
+      style='width: 100%; background-color: white; padding: 20px 40px; box-sizing: border-box;'
+    >
+      <h1 style='margin: 0; font-size: 24px; font-weight: 600;'>GunaKarir</h1>
+    </div>
+
+    <!-- Divider -->
+    <div style='width: 100%; height: 2px; background-color: #E81C24;'></div>
+
+    <!-- Content -->
+    <div
+      style='width: 100%; background-color: white; padding: 20px 40px; box-sizing: border-box;'
+    >
+      <h1 style='font-size: 20px; margin: 0 0 10px; font-weight: 400;'>Hai,
+        <span style='font-weight: 600;'>{{company_name}}</span>
+      </h1>
+
+      {{#eq status 'APPROVED'}}
+        <!-- APPROVED -->
+        <h3 style='margin: 0 0 10px; font-weight: 400;'>Pengajuan Anda Telah
+          Disetujui</h3>
+        <p style='text-align: justify; margin: 0 0 20px;'>
+          Selamat! Permohonan kerja sama Anda sebagai
+          <span style='font-weight: 600;'>Recruiter</span>
+          di
+          <span style='font-weight: 600;'>GunaKarir</span>
+          telah
+          <span style='font-weight: 600;'>disetujui</span>.
+        </p>
+        <p style='text-align: justify; margin: 0 0 20px;'>
+          Sekarang Anda dapat mulai menggunakan fitur-fitur kami dan mengelola
+          proses rekrutmen secara efektif di platform GunaKarir.
+        </p>
+      {{else}}
+        <!-- REJECTED -->
+        <h3 style='margin: 0 0 10px; font-weight: 400;'>Pengajuan Anda Ditolak</h3>
+        <p style='text-align: justify; margin: 0 0 20px;'>
+          Kami mohon maaf, pengajuan kerja sama Anda sebagai
+          <span style='font-weight: 600;'>Recruiter</span>
+          di
+          <span style='font-weight: 600;'>GunaKarir</span>
+          belum dapat disetujui pada saat ini.
+        </p>
+        {{#if rejection_reason}}
+          <p style='text-align: justify; margin: 0 0 20px;'>
+            Alasan penolakan:
+            <span style='font-weight: 600;'>{{rejection_reason}}</span>
+          </p>
+        {{/if}}
+        <p style='text-align: justify; margin: 0 0 20px;'>
+          Anda dapat melakukan perbaikan dan mengajukan banding kembali melalui
+          dashboard akun Anda.
+        </p>
+      {{/eq}}
+
+      <a
+        href='http://localhost:3001'
+        style='display: inline-block; background-color: #E81C24; color: white; text-align: center; font-weight: 600; padding: 12px 16px; border-radius: 12px; text-decoration: none;'
+      >
+        Kunjungi GunaKarir
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div
+      style='width: 100%; background-color: #16325C; color: white; padding: 20px 40px; box-sizing: border-box;'
+    >
+      <h1
+        style='margin: 0 0 10px; font-size: 20px; font-weight: 600;'
+      >GunaKarir</h1>
+      <p style='text-align: justify; margin: 0 0 20px;'>
+        Jl. Margonda Raya No. 100, Pondok Cina, Kecamatan Beji, Kota Depok, Jawa
+        Barat
+      </p>
+      <div style='margin-bottom: 10px;'>
+        <span>(+62) 877-1404-4760</span>
+      </div>
+      <div>
+        <a
+          href='mailto:zidanindratama03@gmail.com'
+          style='color: white; text-decoration: none;'
+        >zidanindratama03@gmail.com</a>
+      </div>
+    </div>
+
+  </body>
+</html>
