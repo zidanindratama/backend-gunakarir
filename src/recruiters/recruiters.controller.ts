@@ -57,7 +57,7 @@ export class RecruitersController {
   @Post('update-otp-request')
   async requestUpdateOtp(@Req() req: Request) {
     const user = req.user;
-    return this.recruitersService.sendUpdateOtp(user.id);
+    return this.recruitersService.sendRecruiterUpdateOtp(user.id);
   }
 
   @Roles('ADMIN')

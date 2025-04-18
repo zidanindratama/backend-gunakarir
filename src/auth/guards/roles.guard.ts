@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
 import { validateApprovedRecruiter } from '../../common/helpers/validate-approved-recruiter';
-import { validateApprovedMahasiswa } from '../../common/helpers/validate-approved-mahasiswa';
+import { validateApprovedStudent } from '../../common/helpers/validate-approved-student';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -41,8 +41,8 @@ export class RolesGuard implements CanActivate {
         await validateApprovedRecruiter(user.id, this.prisma);
       }
 
-      if (user.role === 'MAHASISWA') {
-        await validateApprovedMahasiswa(user.id, this.prisma);
+      if (user.role === 'STUDENT') {
+        await validateApprovedStudent(user.id, this.prisma);
       }
     }
 

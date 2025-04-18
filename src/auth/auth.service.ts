@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dtos/auth.dto';
@@ -66,7 +71,7 @@ export class AuthService {
         username,
         email,
         password: '',
-        role: 'MAHASISWA',
+        role: 'STUDENT',
         image_url: imageUrl,
       },
     });
@@ -171,5 +176,23 @@ export class AuthService {
     });
 
     return { message: 'Password berhasil diubah' };
+  }
+
+  async myProfile(userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: {
+        student: true,
+        recruiter: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User tidak ditemukan');
+    }
+
+    const { password, ...userWithoutPassword } = user;
+
+    return userWithoutPassword;
   }
 }

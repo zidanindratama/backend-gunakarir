@@ -157,6 +157,7 @@ export class AuthController {
 
   @Get('me')
   getMe(@Req() req: Request) {
-    return req.user;
+    const user = req.user;
+    return this.authService.myProfile(user.id);
   }
 }

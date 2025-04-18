@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { RecruiterRequestDto } from './dtos/recruiter-request.dto';
 import { AdminReviewDto } from './dtos/admin-review.dto';
@@ -64,7 +68,20 @@ export class RecruitersService {
       where: {
         id: recruiterId,
       },
+      include: {
+        user: {
+          select: {
+            email: true,
+            username: true,
+            image_url: true,
+          },
+        },
+      },
     });
+
+    if (!recruiter) {
+      throw new NotFoundException('Akun recruiter tidak ditemukan.');
+    }
 
     return recruiter;
   }
@@ -199,7 +216,7 @@ export class RecruitersService {
     return reviewRecruiter;
   }
 
-  async sendUpdateOtp(userId: string) {
+  async sendRecruiterUpdateOtp(userId: string) {
     const user = await this.prismaService.user.findUnique({
       where: { id: userId },
       include: {
@@ -241,7 +258,7 @@ export class RecruitersService {
 
     await this.mailerService.sendMailWithTemplate(
       user.email,
-      'Kode OTP',
+      'Kode OTP Update Profil',
       'otp-edit-recruiter',
       {
         otp_code: otp_code.split(''),

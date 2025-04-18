@@ -1,7 +1,7 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-export const ProfileSettingUpdateSchema = z.object({
+export const StudentProfileUpdateSchema = z.object({
   NPM: z.string().min(8, 'NPM minimal 8 karakter'),
   fullname: z.string().min(3, 'Nama lengkap minimal 3 karakter'),
   address: z.string().min(5, 'Alamat minimal 5 karakter'),
@@ -18,6 +18,6 @@ export const ProfileSettingUpdateSchema = z.object({
   village_id: z.string(),
 });
 
-export class ProfileSettingUpdateDto extends createZodDto(
-  ProfileSettingUpdateSchema,
+export class StudentProfileUpdateDto extends createZodDto(
+  StudentProfileUpdateSchema,
 ) {}

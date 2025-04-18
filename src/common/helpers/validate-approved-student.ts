@@ -1,19 +1,19 @@
 import { ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
-export const validateApprovedMahasiswa = async (
+export const validateApprovedStudent = async (
   userId: string,
   prisma: PrismaService,
 ) => {
-  const mahasiswa = await prisma.mahasiswa.findUnique({
+  const student = await prisma.student.findUnique({
     where: { user_id: userId },
   });
 
-  if (!mahasiswa) {
+  if (!student) {
     throw new ForbiddenException('Akun mahasiswa tidak ditemukan.');
   }
 
-  if (mahasiswa.status !== 'APPROVED') {
+  if (student.status !== 'APPROVED') {
     throw new ForbiddenException('Mahasiswa belum disetujui.');
   }
 };

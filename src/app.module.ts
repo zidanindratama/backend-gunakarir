@@ -10,7 +10,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { MailerModule } from './mailer/mailer.module';
 import { UploadModule } from './upload/upload.module';
 import { RecruitersModule } from './recruiters/recruiters.module';
-import { ProfileSettingModule } from './profile-setting/profile-setting.module';
+import { StudentsModule } from './students/students.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { ProfileSettingModule } from './profile-setting/profile-setting.module';
     MailerModule,
     UploadModule,
     RecruitersModule,
-    ProfileSettingModule,
+    StudentsModule,
   ],
   controllers: [AppController],
   providers: [
