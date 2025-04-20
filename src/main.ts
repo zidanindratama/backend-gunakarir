@@ -8,7 +8,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new PrismaClientExceptionFilter());
 
-  const whitelist = ['http://localhost:3000'];
+  const whitelist = ['http://localhost:3000', 'http://gunakarir.vercel.app'];
 
   app.enableCors({
     origin: whitelist,

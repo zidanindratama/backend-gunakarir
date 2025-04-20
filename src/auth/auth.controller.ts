@@ -95,12 +95,9 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const user = req.user;
-
     const tokens = await this.authService.signin(user);
-
-    setAuthCookies(res, tokens);
-
-    res.redirect(`http://localhost:3000`);
+    setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
+    res.redirect('http://localhost:3000/callback');
   }
 
   @Public()

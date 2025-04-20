@@ -2,9 +2,7 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const SignInSchema = z.object({
-  username: z
-    .string({ required_error: 'Username wajib diisi' })
-    .min(3, 'Username minimal 3 karakter'),
+  email: z.string().email('Format email tidak valid'),
   password: z
     .string({ required_error: 'Password wajib diisi' })
     .min(6, 'Password minimal 6 karakter'),
