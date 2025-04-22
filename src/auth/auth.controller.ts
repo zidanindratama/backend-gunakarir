@@ -98,12 +98,17 @@ export class AuthController {
     const tokens = await this.authService.signin(user);
     setAuthCookies(res, tokens, { refreshToken: true, accessToken: false });
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    const redirectUrl = isProduction
-      ? 'https://frontend-gunakarir.vercel.app/callback'
-      : 'http://localhost:3000/callback';
+    const origin = req.headers.origin || req.headers.referer;
 
-    res.redirect(redirectUrl);
+    let redirectUrl = 'http://localhost:3000/callback';
+
+    if (origin?.includes('frontend-gunakarir.vercel.app')) {
+      redirectUrl = 'https://frontend-gunakarir.vercel.app/callback';
+    } else if (origin?.includes('localhost')) {
+      redirectUrl = 'http://localhost:3000/callback';
+    }
+
+    return res.redirect(redirectUrl);
   }
 
   @Public()
