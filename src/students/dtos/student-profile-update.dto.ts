@@ -6,6 +6,7 @@ export const StudentProfileUpdateSchema = z.object({
   fullname: z.string().min(3, 'Nama lengkap minimal 3 karakter'),
   address: z.string().min(5, 'Alamat minimal 5 karakter'),
   phone_number: z.string().min(10, 'Nomor telepon minimal 10 karakter'),
+  gender: z.enum(['MALE', 'FEMALE']),
   CV_file: z.string().optional(),
   KTM_file: z.string().optional(),
 

@@ -1,3 +1,5 @@
+// Prisma schema for GunaKarir
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -36,12 +38,15 @@ model Student {
   phone_number  String
   linkedin_url  String?
   instagram_url String?
+  gender        Gender
   status        Status  @default(PENDING)
 
   province_id String
   city_id     String
   district_id String
   village_id  String
+
+  applications Application[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -69,6 +74,8 @@ model Recruiter {
   district_id String
   village_id  String
 
+  jobs Job[]
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -86,6 +93,72 @@ model Otp {
   created_at DateTime @default(now())
 }
 
+model Job {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  recruiter_id String    @db.ObjectId
+  recruiter    Recruiter @relation(fields: [recruiter_id], references: [id])
+
+  title             String
+  short_description String
+  full_description  String
+  requirements      String
+  salary            String
+
+  province_id String
+  city_id     String
+
+  applications Application[]
+
+  status     JobStatus @default(ACTIVE)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+}
+
+model Application {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  job_id String @db.ObjectId
+  job    Job    @relation(fields: [job_id], references: [id])
+
+  student_id String  @db.ObjectId
+  student    Student @relation(fields: [student_id], references: [id])
+
+  status     ApplicationStatus  @default(SUBMITTED)
+  interviews Interview[]
+  stages     RecruitmentStage[]
+
+  applied_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Interview {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  application_id String      @db.ObjectId
+  application    Application @relation(fields: [application_id], references: [id])
+
+  schedule           DateTime
+  confirm_deadline   DateTime
+  method             InterviewMethod
+  interview_type     InterviewType
+  interview_link     String?
+  interview_location String?
+  notes              String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model RecruitmentStage {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  application_id String      @db.ObjectId
+  application    Application @relation(fields: [application_id], references: [id])
+
+  stage_type StageType
+  notes      String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 enum Role {
   ADMIN
   RECRUITER
@@ -96,4 +169,43 @@ enum Status {
   APPROVED
   REJECTED
   PENDING
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum JobStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  PASSED_SCREENING
+  FAILED_SCREENING
+  INTERVIEW_INVITED
+  CONFIRMED_INTERVIEW
+  DECLINED_INTERVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum InterviewMethod {
+  ONLINE
+  OFFLINE
+}
+
+enum InterviewType {
+  HR
+  MANAGEMENT
+}
+
+enum StageType {
+  CV_SCREENING
+  HR_INTERVIEW
+  MANAGEMENT_INTERVIEW
 }

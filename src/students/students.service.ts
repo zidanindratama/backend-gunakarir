@@ -185,6 +185,7 @@ export class StudentsService {
           phone_number: data.phone_number,
           linkedin_url: data.linkedin_url,
           instagram_url: data.instagram_url,
+          gender: data.gender,
           CV_file: data.CV_file,
           KTM_file: data.KTM_file,
           province_id: data.province_id,
