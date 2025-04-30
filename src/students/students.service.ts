@@ -137,7 +137,9 @@ export class StudentsService {
 
   async updateMyProfile(
     userId: string,
-    data: Partial<StudentProfileUpdateDto>,
+    data: Partial<
+      StudentProfileUpdateDto & { username?: string; image_url?: string }
+    >,
     otp: string,
   ) {
     try {
@@ -186,6 +188,7 @@ export class StudentsService {
           linkedin_url: data.linkedin_url,
           instagram_url: data.instagram_url,
           gender: data.gender,
+          bio: data.bio,
           CV_file: data.CV_file,
           KTM_file: data.KTM_file,
           province_id: data.province_id,
@@ -213,11 +216,35 @@ export class StudentsService {
         },
       });
 
-      await this.prismaService.oneTimePassword.deleteMany({
+      if (data.username || data.image_url) {
+        if (data.username) {
+          const existingUsername = await this.prismaService.user.findFirst({
+            where: {
+              username: data.username,
+              NOT: { id: userId },
+            },
+          });
+
+          if (existingUsername) {
+            throw new BadRequestException('Username sudah digunakan.');
+          }
+        }
+
+        await this.prismaService.user.update({
+          where: { id: userId },
+          data: {
+            ...(data.username && { username: data.username }),
+            ...(data.image_url && { image_url: data.image_url }),
+          },
+        });
+      }
+
+      await this.prismaService.oneTimePassword.updateMany({
         where: {
           user_id: userId,
           purpose: 'EDIT_STUDENT',
         },
+        data: { used: true },
       });
 
       return updatedStudent;

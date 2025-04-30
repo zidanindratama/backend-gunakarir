@@ -91,6 +91,7 @@ model Student {
   fullname      String
   address       String
   phone_number  String
+  bio           String
   linkedin_url  String?
   instagram_url String?
   gender        Gender
