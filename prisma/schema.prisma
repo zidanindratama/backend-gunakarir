@@ -75,9 +75,9 @@ model User {
   student   Student?
   recruiter Recruiter?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Otp       Otp[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  OTP       OneTimePassword[]
 }
 
 model Student {
@@ -138,12 +138,12 @@ model Recruiter {
   updated_at DateTime @updatedAt
 }
 
-model Otp {
+model OneTimePassword {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   user_id String @db.ObjectId
   user    User   @relation(fields: [user_id], references: [id])
 
-  otp_code   String
+  code       String
   purpose    String
   expires_at DateTime
   used       Boolean  @default(false)
@@ -193,13 +193,13 @@ model Interview {
   application_id String      @db.ObjectId
   application    Application @relation(fields: [application_id], references: [id])
 
-  schedule           DateTime
-  confirm_deadline   DateTime
-  method             InterviewMethod
-  interview_type     InterviewType
-  interview_link     String?
-  interview_location String?
-  notes              String?
+  schedule         DateTime
+  confirm_deadline DateTime
+  method           InterviewMethod
+  type             InterviewType
+  link             String?
+  location         String?
+  notes            String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

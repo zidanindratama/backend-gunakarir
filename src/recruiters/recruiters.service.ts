@@ -230,7 +230,7 @@ export class RecruitersService {
 
     if (!user) throw new ForbiddenException('User tidak ditemukan');
 
-    const existingOtp = await this.prismaService.otp.findFirst({
+    const existingOtp = await this.prismaService.oneTimePassword.findFirst({
       where: {
         user_id: userId,
         purpose: 'EDIT_RECRUITER',
@@ -247,10 +247,10 @@ export class RecruitersService {
 
     const otp_code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await this.prismaService.otp.create({
+    await this.prismaService.oneTimePassword.create({
       data: {
         user_id: userId,
-        otp_code,
+        code: otp_code,
         purpose: 'EDIT_RECRUITER',
         expires_at: new Date(Date.now() + 10 * 60 * 1000), // 10 menit
       },
@@ -296,10 +296,10 @@ export class RecruitersService {
     otp: string,
     data: Partial<RecruiterRequestDto>,
   ) {
-    const otpRecord = await this.prismaService.otp.findFirst({
+    const otpRecord = await this.prismaService.oneTimePassword.findFirst({
       where: {
         user_id: userId,
-        otp_code: otp,
+        code: otp,
         purpose: 'EDIT_RECRUITER',
         expires_at: { gt: new Date() },
         used: false,
@@ -315,7 +315,7 @@ export class RecruitersService {
       data,
     });
 
-    await this.prismaService.otp.deleteMany({
+    await this.prismaService.oneTimePassword.deleteMany({
       where: {
         user_id: userId,
         purpose: 'EDIT_RECRUITER',
