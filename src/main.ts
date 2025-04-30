@@ -6,7 +6,7 @@ import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.f
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // app.useGlobalFilters(new PrismaClientExceptionFilter());
+  app.useGlobalFilters(new PrismaClientExceptionFilter());
 
   const whitelist = [
     'http://localhost:3000',

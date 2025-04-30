@@ -6,13 +6,16 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Catch()
 export class PrismaClientExceptionFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+
+    console.error(`[${request.method}] ${request.url} >>`, exception);
 
     if (exception instanceof Prisma.PrismaClientValidationError) {
       return response.status(HttpStatus.BAD_REQUEST).json({
@@ -33,6 +36,11 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
         const fieldName = match ? match[1] : rawField;
 
         message = `${fieldName.toUpperCase()} sudah digunakan.`;
+      }
+
+      if (exception.code === 'P2025') {
+        message = 'Data yang diminta tidak ditemukan.';
+        statusCode = HttpStatus.NOT_FOUND;
       }
 
       return response.status(statusCode).json({

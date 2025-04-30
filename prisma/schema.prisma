@@ -59,6 +59,7 @@ enum StageType {
 }
 
 enum EducationDegree {
+  D3
   S1
   S2
   S3
@@ -278,7 +279,8 @@ model Major {
   study_program_id String       @db.ObjectId
   studyProgram     StudyProgram @relation(fields: [study_program_id], references: [id])
 
-  name      String     @unique
+  name      String          @unique
+  degree    EducationDegree
   jobMajors JobMajor[]
 
   created_at DateTime @default(now())

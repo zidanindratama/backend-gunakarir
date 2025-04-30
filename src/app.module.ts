@@ -11,6 +11,8 @@ import { MailerModule } from './mailer/mailer.module';
 import { UploadModule } from './upload/upload.module';
 import { RecruitersModule } from './recruiters/recruiters.module';
 import { StudentsModule } from './students/students.module';
+import { StudyProgramsModule } from './study-programs/study-programs.module';
+import { MajorsModule } from './majors/majors.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { StudentsModule } from './students/students.module';
     UploadModule,
     RecruitersModule,
     StudentsModule,
+    StudyProgramsModule,
+    MajorsModule,
   ],
   controllers: [AppController],
   providers: [
