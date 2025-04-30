@@ -1,5 +1,3 @@
-// Prisma schema for GunaKarir
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,6 +5,63 @@ generator client {
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  RECRUITER
+  STUDENT
+}
+
+enum Status {
+  APPROVED
+  REJECTED
+  PENDING
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum JobStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  PASSED_SCREENING
+  FAILED_SCREENING
+  INTERVIEW_INVITED
+  CONFIRMED_INTERVIEW
+  DECLINED_INTERVIEW
+  ACCEPTED
+  REJECTED
+}
+
+enum InterviewMethod {
+  ONLINE
+  OFFLINE
+}
+
+enum InterviewType {
+  HR
+  MANAGEMENT
+}
+
+enum StageType {
+  CV_SCREENING
+  HR_INTERVIEW
+  MANAGEMENT_INTERVIEW
+}
+
+enum EducationDegree {
+  S1
+  S2
+  S3
 }
 
 model User {
@@ -46,7 +101,10 @@ model Student {
   district_id String
   village_id  String
 
-  applications Application[]
+  applications              Application[]
+  organizationalExperiences OrganizationalExperience[]
+  workExperiences           WorkExperience[]
+  educations                Education[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -101,13 +159,13 @@ model Job {
   title             String
   short_description String
   full_description  String
-  requirements      String
   salary            String
 
   province_id String
   city_id     String
 
   applications Application[]
+  jobMajors    JobMajor[]
 
   status     JobStatus @default(ACTIVE)
   created_at DateTime  @default(now())
@@ -159,53 +217,80 @@ model RecruitmentStage {
   updated_at DateTime @updatedAt
 }
 
-enum Role {
-  ADMIN
-  RECRUITER
-  STUDENT
+model OrganizationalExperience {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  student_id String  @db.ObjectId
+  student    Student @relation(fields: [student_id], references: [id])
+
+  organization_name String
+  position          String
+  start_date        DateTime
+  end_date          DateTime?
+  description       String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-enum Status {
-  APPROVED
-  REJECTED
-  PENDING
+model WorkExperience {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  student_id String  @db.ObjectId
+  student    Student @relation(fields: [student_id], references: [id])
+
+  company_name String
+  position     String
+  start_date   DateTime
+  end_date     DateTime?
+  description  String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-enum Gender {
-  MALE
-  FEMALE
+model Education {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  student_id String  @db.ObjectId
+  student    Student @relation(fields: [student_id], references: [id])
+
+  degree       EducationDegree
+  university   String
+  studyProgram String?
+  major        String?
+  gpa          Float?
+  start_year   Int
+  end_year     Int?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-enum JobStatus {
-  ACTIVE
-  INACTIVE
-  CLOSED
+model StudyProgram {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  name   String  @unique
+  majors Major[]
+
+  created_at DateTime @default(now())
 }
 
-enum ApplicationStatus {
-  SUBMITTED
-  UNDER_REVIEW
-  PASSED_SCREENING
-  FAILED_SCREENING
-  INTERVIEW_INVITED
-  CONFIRMED_INTERVIEW
-  DECLINED_INTERVIEW
-  ACCEPTED
-  REJECTED
+model Major {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  study_program_id String       @db.ObjectId
+  studyProgram     StudyProgram @relation(fields: [study_program_id], references: [id])
+
+  name      String     @unique
+  jobMajors JobMajor[]
+
+  created_at DateTime @default(now())
 }
 
-enum InterviewMethod {
-  ONLINE
-  OFFLINE
-}
+model JobMajor {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-enum InterviewType {
-  HR
-  MANAGEMENT
-}
+  job_id String @db.ObjectId
+  job    Job    @relation(fields: [job_id], references: [id])
 
-enum StageType {
-  CV_SCREENING
-  HR_INTERVIEW
-  MANAGEMENT_INTERVIEW
+  major_id String @db.ObjectId
+  major    Major  @relation(fields: [major_id], references: [id])
+
+  created_at DateTime @default(now())
 }
