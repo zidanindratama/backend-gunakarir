@@ -24,13 +24,21 @@ export class MailerService {
   }
 
   private compileTemplate(templateName: string, context: any) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const baseDir = isProd ? 'dist' : 'src';
+
     const filePath = path.join(
-      __dirname,
-      '..',
+      process.cwd(),
+      baseDir,
       'assets',
       'templates',
       `${templateName}.hbs`,
     );
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`❌ Template tidak ditemukan di path: ${filePath}`);
+    }
+
     const source = fs.readFileSync(filePath, 'utf8');
     const template = handlebars.compile(source);
     return template(context);

@@ -189,7 +189,11 @@ export class AuthService {
             organizationalExperiences: true,
           },
         },
-        recruiter: true,
+        recruiter: {
+          include: {
+            jobs: true,
+          },
+        },
       },
     });
 
