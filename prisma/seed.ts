@@ -84,7 +84,7 @@ async function main() {
   ];
 
   for (const program of studyPrograms) {
-    const createdProgram = await prisma.studyProgram.upsert({
+    const createdProgram = await prisma.faculty.upsert({
       where: { name: program.name },
       update: {},
       create: {
@@ -100,7 +100,7 @@ async function main() {
         create: {
           name: major.name,
           degree: major.degree as EducationDegree,
-          study_program_id: createdProgram.id,
+          faculty_id: createdProgram.id,
           created_at: now,
         },
       });

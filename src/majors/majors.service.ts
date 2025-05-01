@@ -31,7 +31,7 @@ export class MajorsService {
       skip,
       take: limit,
       include: {
-        studyProgram: true,
+        faculty: true,
       },
     });
 
@@ -51,7 +51,7 @@ export class MajorsService {
   async getById(id: string) {
     const found = await this.prisma.major.findUnique({
       where: { id },
-      include: { studyProgram: true },
+      include: { faculty: true },
     });
     if (!found) throw new NotFoundException('Jurusan tidak ditemukan');
     return found;

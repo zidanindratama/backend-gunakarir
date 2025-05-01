@@ -254,19 +254,20 @@ model Education {
   student_id String  @db.ObjectId
   student    Student @relation(fields: [student_id], references: [id])
 
-  degree       EducationDegree
-  university   String
-  studyProgram String?
-  major        String?
-  gpa          Float?
-  start_year   Int
-  end_year     Int?
+  degree      EducationDegree
+  university  String
+  faculty     String
+  major       String
+  gpa         Float
+  start_year  Int
+  description String?
+  end_year    Int?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
-model StudyProgram {
+model Faculty {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   name   String  @unique
   majors Major[]
@@ -275,9 +276,9 @@ model StudyProgram {
 }
 
 model Major {
-  id               String       @id @default(auto()) @map("_id") @db.ObjectId
-  study_program_id String       @db.ObjectId
-  studyProgram     StudyProgram @relation(fields: [study_program_id], references: [id])
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  faculty_id String  @db.ObjectId
+  faculty    Faculty @relation(fields: [faculty_id], references: [id])
 
   name      String          @unique
   degree    EducationDegree

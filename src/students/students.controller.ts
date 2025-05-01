@@ -16,6 +16,9 @@ import { StudentFilterDto } from './dtos/student-filter.dto';
 import { BypassApproval } from '../common/decorators/bypass-approval.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Public } from '../common/decorators/public.decorator';
+import { EducationDto } from './dtos/education.dto';
+import { WorkExperienceDto } from './dtos/work-experience.dto';
+import { OrganizationalExperienceDto } from './dtos/organizational-experience';
 
 @Controller('api/students')
 export class StudentsController {
@@ -41,12 +44,20 @@ export class StudentsController {
     return this.studentsService.sendStudentUpdateOtp(user.id);
   }
 
-  @Roles('STUDENT')
-  @BypassApproval()
   @Patch('update-my-profile')
   async updateMyProfile(
     @Req() req: Request,
-    @Body() body: { data: Partial<StudentProfileUpdateDto>; otp: string },
+    @Body()
+    body: {
+      data: Partial<StudentProfileUpdateDto> & {
+        username?: string;
+        image_url?: string;
+        educations?: EducationDto[];
+        workExperiences?: WorkExperienceDto[];
+        organizationalExperiences?: OrganizationalExperienceDto[];
+      };
+      otp: string;
+    },
   ) {
     const user = req.user;
     return this.studentsService.updateMyProfile(user.id, body.data, body.otp);

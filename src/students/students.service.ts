@@ -11,6 +11,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StudentProfileUpdateDto } from './dtos/student-profile-update.dto';
 import { validateStudent } from '../common/helpers/validate-student';
 import { StudentFilterDto } from './dtos/student-filter.dto';
+import { EducationDto, EducationSchema } from './dtos/education.dto';
+import {
+  WorkExperienceDto,
+  WorkExperienceSchema,
+} from './dtos/work-experience.dto';
+import {
+  OrganizationalExperienceDto,
+  OrganizationalExperienceSchema,
+} from './dtos/organizational-experience';
 
 @Injectable()
 export class StudentsService {
@@ -138,7 +147,13 @@ export class StudentsService {
   async updateMyProfile(
     userId: string,
     data: Partial<
-      StudentProfileUpdateDto & { username?: string; image_url?: string }
+      StudentProfileUpdateDto & {
+        username?: string;
+        image_url?: string;
+        educations?: EducationDto[];
+        workExperiences?: WorkExperienceDto[];
+        organizationalExperiences?: OrganizationalExperienceDto[];
+      }
     >,
     otp: string,
   ) {
@@ -237,6 +252,81 @@ export class StudentsService {
             ...(data.image_url && { image_url: data.image_url }),
           },
         });
+      }
+
+      if (data.educations && Array.isArray(data.educations)) {
+        for (const edu of data.educations) {
+          EducationSchema.parse(edu);
+        }
+
+        await this.prismaService.education.deleteMany({
+          where: { student_id: updatedStudent.id },
+        });
+
+        for (const edu of data.educations) {
+          await this.prismaService.education.create({
+            data: {
+              student_id: updatedStudent.id,
+              degree: edu.degree,
+              university: edu.university,
+              faculty: edu.faculty,
+              major: edu.major,
+              gpa: edu.gpa,
+              start_year: edu.start_year,
+              end_year: edu.ongoing ? null : edu.end_year,
+              description: edu.description || '',
+            },
+          });
+        }
+      }
+
+      if (data.workExperiences && Array.isArray(data.workExperiences)) {
+        for (const work of data.workExperiences) {
+          WorkExperienceSchema.parse(work);
+        }
+
+        await this.prismaService.workExperience.deleteMany({
+          where: { student_id: updatedStudent.id },
+        });
+
+        for (const work of data.workExperiences) {
+          await this.prismaService.workExperience.create({
+            data: {
+              student_id: updatedStudent.id,
+              company_name: work.company_name,
+              position: work.position,
+              start_date: new Date(work.start_date),
+              end_date: work.ongoing ? null : new Date(work.end_date),
+              description: work.description || '',
+            },
+          });
+        }
+      }
+
+      if (
+        data.organizationalExperiences &&
+        Array.isArray(data.organizationalExperiences)
+      ) {
+        for (const org of data.organizationalExperiences) {
+          OrganizationalExperienceSchema.parse(org);
+        }
+
+        await this.prismaService.organizationalExperience.deleteMany({
+          where: { student_id: updatedStudent.id },
+        });
+
+        for (const org of data.organizationalExperiences) {
+          await this.prismaService.organizationalExperience.create({
+            data: {
+              student_id: updatedStudent.id,
+              organization_name: org.organization_name,
+              position: org.position,
+              start_date: new Date(org.start_date),
+              end_date: org.ongoing ? null : new Date(org.end_date),
+              description: org.description || '',
+            },
+          });
+        }
       }
 
       await this.prismaService.oneTimePassword.updateMany({

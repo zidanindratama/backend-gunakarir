@@ -1,18 +1,18 @@
-import { Prisma } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { StudyProgramFilterDto } from './dtos/study-program-filter.dto';
+import { FacultyFilterDto } from './dtos/faculty-filter.dto';
 
 @Injectable()
-export class StudyProgramsService {
+export class FacultiesService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll(query: StudyProgramFilterDto) {
+  async getAll(query: FacultyFilterDto) {
     const page = +(query.page ?? 1);
     const limit = +(query.limit ?? 10);
     const skip = (page - 1) * limit;
 
-    const where: Prisma.StudyProgramWhereInput = query.search
+    const where: Prisma.FacultyWhereInput = query.search
       ? {
           name: {
             contains: query.search,
@@ -21,7 +21,7 @@ export class StudyProgramsService {
         }
       : {};
 
-    const studyPrograms = await this.prisma.studyProgram.findMany({
+    const studyPrograms = await this.prisma.faculty.findMany({
       where,
       skip,
       take: limit,
@@ -33,7 +33,7 @@ export class StudyProgramsService {
       },
     });
 
-    const total = await this.prisma.studyProgram.count({ where });
+    const total = await this.prisma.faculty.count({ where });
 
     return {
       data: studyPrograms,
@@ -47,7 +47,7 @@ export class StudyProgramsService {
   }
 
   async getById(id: string) {
-    const found = await this.prisma.studyProgram.findUnique({
+    const found = await this.prisma.faculty.findUnique({
       where: { id },
       include: { majors: true },
     });
@@ -56,14 +56,14 @@ export class StudyProgramsService {
   }
 
   async create(data: { name: string }) {
-    return this.prisma.studyProgram.create({ data });
+    return this.prisma.faculty.create({ data });
   }
 
   async update(id: string, data: { name: string }) {
-    return this.prisma.studyProgram.update({ where: { id }, data });
+    return this.prisma.faculty.update({ where: { id }, data });
   }
 
   async delete(id: string) {
-    return this.prisma.studyProgram.delete({ where: { id } });
+    return this.prisma.faculty.delete({ where: { id } });
   }
 }
