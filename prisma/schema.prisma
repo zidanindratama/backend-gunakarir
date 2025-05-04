@@ -76,15 +76,16 @@ model User {
   student   Student?
   recruiter Recruiter?
 
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  OTP       OneTimePassword[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  OTP OneTimePassword[]
 }
 
 model Student {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   user_id String @unique @db.ObjectId
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   NPM           String
   CV_file       String
@@ -115,7 +116,7 @@ model Student {
 model Recruiter {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   user_id String @unique @db.ObjectId
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   NPWP                String  @unique
   company_name        String
@@ -140,28 +141,18 @@ model Recruiter {
   updated_at DateTime @updatedAt
 }
 
-model OneTimePassword {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  user_id String @db.ObjectId
-  user    User   @relation(fields: [user_id], references: [id])
-
-  code       String
-  purpose    String
-  expires_at DateTime
-  used       Boolean  @default(false)
-
-  created_at DateTime @default(now())
-}
-
 model Job {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   recruiter_id String    @db.ObjectId
-  recruiter    Recruiter @relation(fields: [recruiter_id], references: [id])
+  recruiter    Recruiter @relation(fields: [recruiter_id], references: [id], onDelete: Cascade)
 
   title             String
   short_description String
   full_description  String
-  salary            String
+  salary            Int
+  quota             Int
+  application_start DateTime
+  application_end   DateTime
 
   province_id String
   city_id     String
@@ -177,10 +168,10 @@ model Job {
 model Application {
   id     String @id @default(auto()) @map("_id") @db.ObjectId
   job_id String @db.ObjectId
-  job    Job    @relation(fields: [job_id], references: [id])
+  job    Job    @relation(fields: [job_id], references: [id], onDelete: Cascade)
 
   student_id String  @db.ObjectId
-  student    Student @relation(fields: [student_id], references: [id])
+  student    Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   status     ApplicationStatus  @default(SUBMITTED)
   interviews Interview[]
@@ -193,7 +184,7 @@ model Application {
 model Interview {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
   application_id String      @db.ObjectId
-  application    Application @relation(fields: [application_id], references: [id])
+  application    Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
 
   schedule         DateTime
   confirm_deadline DateTime
@@ -210,7 +201,7 @@ model Interview {
 model RecruitmentStage {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
   application_id String      @db.ObjectId
-  application    Application @relation(fields: [application_id], references: [id])
+  application    Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
 
   stage_type StageType
   notes      String?
@@ -222,7 +213,7 @@ model RecruitmentStage {
 model OrganizationalExperience {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   student_id String  @db.ObjectId
-  student    Student @relation(fields: [student_id], references: [id])
+  student    Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   organization_name String
   position          String
@@ -237,7 +228,7 @@ model OrganizationalExperience {
 model WorkExperience {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   student_id String  @db.ObjectId
-  student    Student @relation(fields: [student_id], references: [id])
+  student    Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   company_name String
   position     String
@@ -252,7 +243,7 @@ model WorkExperience {
 model Education {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   student_id String  @db.ObjectId
-  student    Student @relation(fields: [student_id], references: [id])
+  student    Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
   degree      EducationDegree
   university  String
@@ -267,6 +258,19 @@ model Education {
   updated_at DateTime @updatedAt
 }
 
+model OneTimePassword {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user_id String @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  code       String
+  purpose    String
+  expires_at DateTime
+  used       Boolean  @default(false)
+
+  created_at DateTime @default(now())
+}
+
 model Faculty {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId
   name   String  @unique
@@ -278,7 +282,7 @@ model Faculty {
 model Major {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   faculty_id String  @db.ObjectId
-  faculty    Faculty @relation(fields: [faculty_id], references: [id])
+  faculty    Faculty @relation(fields: [faculty_id], references: [id], onDelete: Cascade)
 
   name      String          @unique
   degree    EducationDegree
@@ -291,7 +295,7 @@ model JobMajor {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   job_id String @db.ObjectId
-  job    Job    @relation(fields: [job_id], references: [id])
+  job    Job    @relation(fields: [job_id], references: [id], onDelete: Cascade)
 
   major_id String @db.ObjectId
   major    Major  @relation(fields: [major_id], references: [id])

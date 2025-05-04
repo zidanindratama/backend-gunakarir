@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -76,6 +77,7 @@ export class RecruitersService {
             image_url: true,
           },
         },
+        jobs: true,
       },
     });
 
@@ -87,6 +89,8 @@ export class RecruitersService {
   }
 
   async recruiterRequestCreate(userId: string, data: RecruiterRequestDto) {
+    const { username, image_url, ...rest } = data;
+
     const existingRecruiter = await this.prismaService.recruiter.findUnique({
       where: { user_id: userId },
     });
@@ -98,22 +102,22 @@ export class RecruitersService {
     const recruiter = await this.prismaService.recruiter.create({
       data: {
         user: { connect: { id: userId } },
-        NPWP: data.NPWP,
-        company_name: data.company_name,
-        company_logo: data.company_logo,
-        company_description: data.company_description,
-        contract_file: data.contract_file,
-        address: data.address,
-        phone_number: data.phone_number,
+        NPWP: rest.NPWP,
+        company_name: rest.company_name,
+        company_logo: rest.company_logo,
+        company_description: rest.company_description,
+        contract_file: rest.contract_file,
+        address: rest.address,
+        phone_number: rest.phone_number,
 
-        linkedin_url: data.linkedin_url,
-        instagram_url: data.instagram_url,
-        status: data.status ?? 'PENDING',
+        linkedin_url: rest.linkedin_url,
+        instagram_url: rest.instagram_url,
+        status: rest.status ?? 'PENDING',
 
-        province_id: data.province_id,
-        city_id: data.city_id,
-        district_id: data.district_id,
-        village_id: data.village_id,
+        province_id: rest.province_id,
+        city_id: rest.city_id,
+        district_id: rest.district_id,
+        village_id: rest.village_id,
       },
       include: {
         user: {
@@ -123,6 +127,29 @@ export class RecruitersService {
         },
       },
     });
+
+    if (username || image_url) {
+      if (username) {
+        const existingUsername = await this.prismaService.user.findFirst({
+          where: {
+            username: username,
+            NOT: { id: userId },
+          },
+        });
+
+        if (existingUsername) {
+          throw new BadRequestException('Username sudah digunakan.');
+        }
+      }
+
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          ...(username && { username: username }),
+          ...(image_url && { image_url: image_url }),
+        },
+      });
+    }
 
     await this.mailerService.sendMailWithTemplate(
       recruiter.user.email,
@@ -136,7 +163,12 @@ export class RecruitersService {
 
   async recruiterRequestAppeal(
     userId: string,
-    data: Partial<RecruiterRequestDto>,
+    data: Partial<
+      RecruiterRequestDto & {
+        username?: string;
+        image_url?: string;
+      }
+    >,
   ) {
     const recruiter = await this.prismaService.recruiter.findUnique({
       where: { user_id: userId },
@@ -273,6 +305,8 @@ export class RecruitersService {
     userId: string,
     data: Partial<RecruiterRequestDto>,
   ) {
+    const { username, image_url, ...rest } = data;
+
     const recruiter = await this.prismaService.recruiter.findUnique({
       where: { user_id: userId },
     });
@@ -285,10 +319,35 @@ export class RecruitersService {
       throw new ForbiddenException('Hanya bisa mengedit saat status PENDING.');
     }
 
-    return this.prismaService.recruiter.update({
+    const updatedRecruiter = await this.prismaService.recruiter.update({
       where: { user_id: userId },
-      data,
+      data: rest,
     });
+
+    if (username || image_url) {
+      if (username) {
+        const existingUsername = await this.prismaService.user.findFirst({
+          where: {
+            username: username,
+            NOT: { id: userId },
+          },
+        });
+
+        if (existingUsername) {
+          throw new BadRequestException('Username sudah digunakan.');
+        }
+      }
+
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          ...(username && { username: username }),
+          ...(image_url && { image_url: image_url }),
+        },
+      });
+    }
+
+    return updatedRecruiter;
   }
 
   async updateRecruiterWithOtp(
@@ -296,6 +355,8 @@ export class RecruitersService {
     otp: string,
     data: Partial<RecruiterRequestDto>,
   ) {
+    const { username, image_url, ...rest } = data;
+
     const otpRecord = await this.prismaService.oneTimePassword.findFirst({
       where: {
         user_id: userId,
@@ -312,8 +373,31 @@ export class RecruitersService {
 
     const updatedRecruiter = await this.prismaService.recruiter.update({
       where: { user_id: userId },
-      data,
+      data: rest,
     });
+
+    if (username || image_url) {
+      if (username) {
+        const existingUsername = await this.prismaService.user.findFirst({
+          where: {
+            username: username,
+            NOT: { id: userId },
+          },
+        });
+
+        if (existingUsername) {
+          throw new BadRequestException('Username sudah digunakan.');
+        }
+      }
+
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          ...(username && { username: username }),
+          ...(image_url && { image_url: image_url }),
+        },
+      });
+    }
 
     await this.prismaService.oneTimePassword.deleteMany({
       where: {
@@ -323,5 +407,25 @@ export class RecruitersService {
     });
 
     return updatedRecruiter;
+  }
+
+  async deleteRecruiter(recruiterId: string) {
+    const student = await this.prismaService.recruiter.findUnique({
+      where: {
+        id: recruiterId,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Rekruter tidak ditemukan.');
+    }
+
+    await this.prismaService.recruiter.delete({
+      where: {
+        id: recruiterId,
+      },
+    });
+
+    return { message: 'Rekruter berhasil dihapus.' };
   }
 }

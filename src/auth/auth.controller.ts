@@ -49,7 +49,7 @@ export class AuthController {
 
     let redirectUrl = '/dashboard';
     if (user.role === 'RECRUITER' && isRecruiterExist === null) {
-      redirectUrl = '/dashboard/recruiter-request';
+      redirectUrl = '/dashboard/profile';
     }
     if (user.role === 'STUDENT') {
       redirectUrl = '/profile';
@@ -78,7 +78,7 @@ export class AuthController {
 
     let redirectUrl = '/dashboard';
     if (user.role === 'RECRUITER' && isRecruiterExist === null) {
-      redirectUrl = '/dashboard/recruiter-request';
+      redirectUrl = '/dashboard/profile';
     }
     if (user.role === 'STUDENT') {
       redirectUrl = '/profile';

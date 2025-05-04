@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -92,5 +93,11 @@ export class RecruitersController {
       body.otp,
       body.data,
     );
+  }
+
+  @Roles('ADMIN')
+  @Delete('/:recruiterId')
+  async deleteRecruiter(@Param('recruiterId') recruiterId: string) {
+    return this.recruitersService.deleteRecruiter(recruiterId);
   }
 }

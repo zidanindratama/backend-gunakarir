@@ -91,6 +91,9 @@ export class StudentsService {
             image_url: true,
           },
         },
+        educations: true,
+        organizationalExperiences: true,
+        workExperiences: true,
       },
     });
 

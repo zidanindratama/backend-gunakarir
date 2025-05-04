@@ -13,6 +13,7 @@ import { RecruitersModule } from './recruiters/recruiters.module';
 import { StudentsModule } from './students/students.module';
 import { MajorsModule } from './majors/majors.module';
 import { FacultiesModule } from './faculties/faculties.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FacultiesModule } from './faculties/faculties.module';
     StudentsModule,
     FacultiesModule,
     MajorsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [
