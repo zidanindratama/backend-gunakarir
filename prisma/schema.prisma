@@ -24,10 +24,12 @@ enum Gender {
   FEMALE
 }
 
-enum JobStatus {
-  ACTIVE
-  INACTIVE
-  CLOSED
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  CONTRACT
+  FREELANCE
 }
 
 enum ApplicationStatus {
@@ -153,16 +155,18 @@ model Job {
   quota             Int
   application_start DateTime
   application_end   DateTime
+  status            Boolean  @default(true)
 
   province_id String
   city_id     String
 
+  type JobType @default(FULL_TIME)
+
   applications Application[]
   jobMajors    JobMajor[]
 
-  status     JobStatus @default(ACTIVE)
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Application {

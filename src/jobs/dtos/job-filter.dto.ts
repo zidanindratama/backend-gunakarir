@@ -9,7 +9,17 @@ export const JobFilterSchema = z.object({
   city_id: z.string().optional(),
   majorId: z.string().optional(),
   recruiter_id: z.string().optional(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'CLOSED']).optional(),
+  status: z.string().optional(),
+  type: z
+    .enum([
+      'FULL_TIME',
+      'PART_TIME',
+      'INTERNSHIP',
+      'CONTRACT',
+      'FREELANCE',
+      'TEMPORARY',
+    ])
+    .optional(),
 });
 
 export class JobFilterDto extends createZodDto(JobFilterSchema) {}

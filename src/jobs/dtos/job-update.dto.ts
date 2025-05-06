@@ -11,9 +11,21 @@ export const UpdateJobSchema = z
 
     application_start: z.coerce.date().optional(),
     application_end: z.coerce.date().optional(),
+    status: z.boolean().optional(),
 
     province_id: z.string().min(1).optional(),
     city_id: z.string().min(1).optional(),
+
+    type: z
+      .enum([
+        'FULL_TIME',
+        'PART_TIME',
+        'INTERNSHIP',
+        'CONTRACT',
+        'FREELANCE',
+        'TEMPORARY',
+      ])
+      .optional(),
 
     major_ids: z.array(z.string()).optional(),
   })

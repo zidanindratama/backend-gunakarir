@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JobFilterDto } from './dtos/job-filter.dto';
 import { CreateJobDto } from './dtos/job-create.dto';
 import { UpdateJobDto } from './dtos/job-update.dto';
-import { Prisma } from '@prisma/client';
+import { JobType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class JobsService {
@@ -20,7 +20,7 @@ export class JobsService {
       }),
       ...(query.province_id && { province_id: query.province_id }),
       ...(query.city_id && { city_id: query.city_id }),
-      ...(query.status && { status: query.status }),
+      ...(query.status && { status: query.status === 'true' ? true : false }),
       ...(query.recruiter_id && { recruiter_id: query.recruiter_id }),
       ...(query.majorId && {
         jobMajors: {
@@ -29,14 +29,13 @@ export class JobsService {
           },
         },
       }),
+      ...(query.type && { type: query.type as JobType }),
     };
 
     const jobs = await this.prisma.job.findMany({
       skip,
       take: limit,
-      where: {
-        ...where,
-      },
+      where,
       orderBy: {
         created_at: 'desc',
       },
@@ -122,6 +121,7 @@ export class JobsService {
         province_id: dto.province_id,
         city_id: dto.city_id,
         recruiter_id: recruiterId,
+        type: dto.type as JobType,
         jobMajors: dto.major_ids
           ? {
               create: dto.major_ids.map((id) => ({ major_id: id })),
@@ -139,12 +139,13 @@ export class JobsService {
       throw new NotFoundException('Lowongan pekerjaan tidak ditemukan.');
     }
 
-    const { major_ids, ...jobData } = dto;
+    const { major_ids, type, ...jobData } = dto;
 
     const updatedJob = await this.prisma.job.update({
       where: { id },
       data: {
         ...jobData,
+        type: dto.type as JobType,
         jobMajors: major_ids
           ? {
               deleteMany: {},

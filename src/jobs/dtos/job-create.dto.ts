@@ -17,9 +17,21 @@ export const CreateJobSchema = z
     application_end: z.coerce.date({
       invalid_type_error: 'Tanggal akhir lamar tidak valid',
     }),
+    status: z.boolean(),
 
     province_id: z.string().min(1, 'Provinsi wajib diisi'),
     city_id: z.string().min(1, 'Kota/Kabupaten wajib diisi'),
+
+    type: z
+      .enum([
+        'FULL_TIME',
+        'PART_TIME',
+        'INTERNSHIP',
+        'CONTRACT',
+        'FREELANCE',
+        'TEMPORARY',
+      ])
+      .default('FULL_TIME'),
 
     major_ids: z.array(z.string()).optional(),
   })
