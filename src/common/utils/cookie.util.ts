@@ -1,5 +1,3 @@
-// File: setAuthCookies.ts
-
 import { Response } from 'express';
 
 type TokenOptions = {

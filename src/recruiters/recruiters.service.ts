@@ -170,6 +170,8 @@ export class RecruitersService {
       }
     >,
   ) {
+    const { username, image_url, ...rest } = data;
+
     const recruiter = await this.prismaService.recruiter.findUnique({
       where: { user_id: userId },
     });
@@ -187,7 +189,7 @@ export class RecruitersService {
     const updatedRecruiter = await this.prismaService.recruiter.update({
       where: { user_id: userId },
       data: {
-        ...data,
+        ...rest,
         status: 'PENDING',
       },
       include: {
@@ -198,6 +200,29 @@ export class RecruitersService {
         },
       },
     });
+
+    if (username || image_url) {
+      if (username) {
+        const existingUsername = await this.prismaService.user.findFirst({
+          where: {
+            username: username,
+            NOT: { id: userId },
+          },
+        });
+
+        if (existingUsername) {
+          throw new BadRequestException('Username sudah digunakan.');
+        }
+      }
+
+      await this.prismaService.user.update({
+        where: { id: userId },
+        data: {
+          ...(username && { username: username }),
+          ...(image_url && { image_url: image_url }),
+        },
+      });
+    }
 
     await this.mailerService.sendMailWithTemplate(
       updatedRecruiter.user.email,
@@ -284,7 +309,7 @@ export class RecruitersService {
         user_id: userId,
         code: otp_code,
         purpose: 'EDIT_RECRUITER',
-        expires_at: new Date(Date.now() + 10 * 60 * 1000), // 10 menit
+        expires_at: new Date(Date.now() + 10 * 60 * 1000),
       },
     });
 

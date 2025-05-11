@@ -14,6 +14,8 @@ import { StudentsModule } from './students/students.module';
 import { MajorsModule } from './majors/majors.module';
 import { FacultiesModule } from './faculties/faculties.module';
 import { JobsModule } from './jobs/jobs.module';
+import { ApplicationsModule } from './applications/applications.module';
+import { RecruitmentStagesModule } from './recruitment-stages/recruitment-stages.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { JobsModule } from './jobs/jobs.module';
     FacultiesModule,
     MajorsModule,
     JobsModule,
+    ApplicationsModule,
+    RecruitmentStagesModule,
   ],
   controllers: [AppController],
   providers: [
