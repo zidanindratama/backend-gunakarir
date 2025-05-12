@@ -1,8 +1,16 @@
-import { Controller, Post, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Param,
+  Body,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { RecruitmentStagesService } from './recruitment-stages.service';
 import { RecruitmentStageCreateDto } from './dtos/recruitment-stage-create.dto';
 import { InterviewCreateDto } from './dtos/interview-create.dto';
 import { Roles } from '../common/decorators/roles.decorator';
+import { RecruitmentStageUpdateDto } from './dtos/recruitment-stage-update.dto';
 
 @Controller('api/applications/:id/stages')
 export class RecruitmentStagesController {
@@ -20,5 +28,14 @@ export class RecruitmentStagesController {
       body.stage,
       body.interview,
     );
+  }
+
+  @Roles('RECRUITER')
+  @Patch('/:stageId')
+  async updateStage(
+    @Param('stageId') stageId: string,
+    @Body() dto: RecruitmentStageUpdateDto,
+  ) {
+    return this.stageService.updateStage(stageId, dto);
   }
 }

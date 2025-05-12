@@ -20,6 +20,9 @@ export class ApplicationsService {
 
     const where: Prisma.ApplicationWhereInput = {
       ...(query.status && { status: query.status }),
+      ...(query.exclude_status && {
+        NOT: { status: query.exclude_status },
+      }),
       ...(query.student_id && { student_id: query.student_id }),
       ...(query.job_id && { job_id: query.job_id }),
       ...(query.search && {
@@ -29,6 +32,13 @@ export class ApplicationsService {
               contains: query.search,
               mode: 'insensitive',
             },
+          },
+        },
+      }),
+      ...(query.stage_type && {
+        stages: {
+          some: {
+            stage_type: query.stage_type,
           },
         },
       }),
@@ -45,7 +55,98 @@ export class ApplicationsService {
         student: true,
         job: {
           include: {
-            recruiter: true,
+            recruiter: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        stages: {
+          orderBy: {
+            created_at: 'asc',
+          },
+        },
+        interviews: {
+          orderBy: {
+            schedule: 'asc',
+          },
+        },
+      },
+    });
+
+    const total = await this.prisma.application.count({ where });
+
+    return {
+      data: applications,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getApplicationsByJobId(jobId: string, query: ApplicationFilterDto) {
+    const page = +(query.page ?? 1);
+    const limit = +(query.limit ?? 10);
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ApplicationWhereInput = {
+      job_id: jobId,
+      ...(query.status && { status: query.status }),
+      ...(query.exclude_status && {
+        NOT: { status: query.exclude_status },
+      }),
+      ...(query.student_id && { student_id: query.student_id }),
+      ...(query.search && {
+        job: {
+          is: {
+            title: {
+              contains: query.search,
+              mode: 'insensitive',
+            },
+          },
+        },
+      }),
+      ...(query.stage_type && {
+        stages: {
+          some: {
+            stage_type: query.stage_type,
+          },
+        },
+      }),
+    };
+
+    const applications = await this.prisma.application.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        applied_at: 'desc',
+      },
+      include: {
+        student: true,
+        job: {
+          include: {
+            recruiter: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    email: true,
+                  },
+                },
+              },
+            },
           },
         },
         stages: {

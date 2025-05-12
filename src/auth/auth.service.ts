@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -10,6 +11,7 @@ import { RegisterDto } from './dtos/auth.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { MailerService } from '../mailer/mailer.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AdminProfileUpdateDto } from './dtos/admin-profile-update.dto';
 
 @Injectable()
 export class AuthService {
@@ -204,5 +206,26 @@ export class AuthService {
     const { password, ...userWithoutPassword } = user;
 
     return userWithoutPassword;
+  }
+
+  async updateAdminProfile(userId: string, data: AdminProfileUpdateDto) {
+    const existingUsername = await this.prismaService.user.findFirst({
+      where: {
+        username: data.username,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingUsername) {
+      throw new BadRequestException('Username sudah digunakan.');
+    }
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        ...(data.username && { username: data.username }),
+        ...(data.image_url && { image_url: data.image_url }),
+      },
+    });
   }
 }

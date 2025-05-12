@@ -25,6 +25,14 @@ export class ApplicationsController {
     return this.appService.getAllApplication(query);
   }
 
+  @Get('/stages/:jobId')
+  async getApplicationsByJob(
+    @Param('jobId') jobId: string,
+    @Query() query: ApplicationFilterDto,
+  ) {
+    return this.appService.getApplicationsByJobId(jobId, query);
+  }
+
   @Get('/my-applications/:studentId')
   async getMyApplications(
     @Param('studentId') studentId: string,

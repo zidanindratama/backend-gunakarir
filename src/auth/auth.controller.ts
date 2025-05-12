@@ -22,6 +22,8 @@ import { ChangePasswordDto } from './dtos/change-password.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { setAuthCookies } from '../common/utils/cookie.util';
 import { PrismaService } from '../prisma/prisma.service';
+import { Roles } from '../common/decorators/roles.decorator';
+import { AdminProfileUpdateDto } from './dtos/admin-profile-update.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -168,5 +170,12 @@ export class AuthController {
   getMe(@Req() req: Request) {
     const user = req.user;
     return this.authService.myProfile(user.id);
+  }
+
+  @Roles('ADMIN')
+  @Patch('update-admin-profile')
+  updateAdminProfile(@Req() req: Request, @Body() body: AdminProfileUpdateDto) {
+    const user = req.user;
+    return this.authService.updateAdminProfile(user.id, body);
   }
 }
