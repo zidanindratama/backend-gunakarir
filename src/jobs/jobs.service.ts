@@ -98,6 +98,11 @@ export class JobsService {
             },
           },
         },
+        _count: {
+          select: {
+            applications: true,
+          },
+        },
       },
     });
 
@@ -105,7 +110,10 @@ export class JobsService {
       throw new NotFoundException('Lowongan pekerjaan tidak ditemukan.');
     }
 
-    return job;
+    return {
+      ...job,
+      total_applicants: job._count.applications,
+    };
   }
 
   async createJob(dto: CreateJobDto, recruiterId: string) {
