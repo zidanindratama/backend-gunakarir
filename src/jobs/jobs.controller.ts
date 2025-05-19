@@ -7,8 +7,6 @@ import {
   Param,
   Body,
   Query,
-  ParseUUIDPipe,
-  Req,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dtos/job-create.dto';
