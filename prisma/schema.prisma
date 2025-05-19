@@ -178,8 +178,9 @@ model Application {
   interviews Interview[]
   stages     RecruitmentStage[]
 
-  applied_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  applied_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  AiInterview AiInterview?
 }
 
 model Interview {
@@ -306,4 +307,41 @@ model JobMajor {
 
   created_at DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model AiInterview {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  application_id String      @unique @db.ObjectId
+  application    Application @relation(fields: [application_id], references: [id], onDelete: Cascade)
+
+  questions AiInterviewQuestion[]
+  feedback  String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model AiInterviewQuestion {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  aiInterview_id String      @db.ObjectId
+  aiInterview    AiInterview @relation(fields: [aiInterview_id], references: [id], onDelete: Cascade)
+
+  question String
+  answer   String?
+
+  feedback AiInterviewFeedback?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model AiInterviewFeedback {
+  id          String              @id @default(auto()) @map("_id") @db.ObjectId
+  question_id String              @unique @db.ObjectId
+  question    AiInterviewQuestion @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  feedback String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
