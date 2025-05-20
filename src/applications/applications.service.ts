@@ -78,6 +78,18 @@ export class ApplicationsService {
             schedule: 'asc',
           },
         },
+        AiInterview: {
+          include: {
+            questions: {
+              include: {
+                feedback: true,
+              },
+              orderBy: {
+                created_at: 'asc',
+              },
+            },
+          },
+        },
       },
     });
 

@@ -75,6 +75,7 @@ export class AiInterviewService {
 
     return {
       application_id: interview.application_id,
+      feedback: interview.feedback,
       created_at: interview.created_at,
       updated_at: interview.updated_at,
       questions: interview.questions.map((q) => ({
