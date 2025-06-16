@@ -178,9 +178,21 @@ model Application {
   interviews Interview[]
   stages     RecruitmentStage[]
 
-  applied_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
-  AiInterview AiInterview?
+  applied_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+  AiInterview        AiInterview?
+  ApplicationHistory ApplicationHistory[]
+}
+
+model ApplicationHistory {
+  id             String            @id @default(auto()) @map("_id") @db.ObjectId
+  application_id String            @db.ObjectId
+  application    Application       @relation(fields: [application_id], references: [id])
+  changed_by     String
+  from_status    ApplicationStatus
+  to_status      ApplicationStatus
+  reason         String?
+  created_at     DateTime          @default(now())
 }
 
 model Interview {

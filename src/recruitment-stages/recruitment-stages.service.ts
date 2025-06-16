@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RecruitmentStageCreateDto } from './dtos/recruitment-stage-create.dto';
 import { InterviewCreateDto } from './dtos/interview-create.dto';
 import { RecruitmentStageUpdateDto } from './dtos/recruitment-stage-update.dto';
+import { ApplicationStatus } from '@prisma/client';
 
 @Injectable()
 export class RecruitmentStagesService {
@@ -16,6 +17,7 @@ export class RecruitmentStagesService {
     applicationId: string,
     dto: RecruitmentStageCreateDto,
     interviewDto?: InterviewCreateDto,
+    finalStatus?: ApplicationStatus,
   ) {
     const application = await this.prisma.application.findUnique({
       where: { id: applicationId },
@@ -23,6 +25,30 @@ export class RecruitmentStagesService {
 
     if (!application) {
       throw new NotFoundException('Lamaran tidak ditemukan.');
+    }
+
+    const isTryingToLolos =
+      finalStatus === 'ACCEPTED' || finalStatus === 'INTERVIEW_INVITED';
+
+    const isNotCvScreening = dto.stage_type !== 'CV_SCREENING';
+
+    if (isTryingToLolos && isNotCvScreening) {
+      const latestInterview = await this.prisma.interview.findFirst({
+        where: { application_id: applicationId },
+        orderBy: { schedule: 'desc' },
+      });
+
+      if (!latestInterview) {
+        throw new BadRequestException(
+          'Tidak dapat meloloskan kandidat yang belum memiliki jadwal interview.',
+        );
+      }
+
+      if (application.status !== 'CONFIRMED_INTERVIEW') {
+        throw new BadRequestException(
+          'Kandidat belum mengonfirmasi kehadiran interview, tidak bisa diloloskan.',
+        );
+      }
     }
 
     await this.prisma.recruitmentStage.deleteMany({
@@ -60,10 +86,25 @@ export class RecruitmentStagesService {
       });
     }
 
+    if (finalStatus) {
+      await this.prisma.application.update({
+        where: { id: applicationId },
+        data: {
+          status: finalStatus,
+          updated_at: new Date(),
+        },
+      });
+    }
+
     return stage;
   }
 
-  async updateStage(stageId: string, dto: RecruitmentStageUpdateDto) {
+  async updateStage(
+    stageId: string,
+    dto: RecruitmentStageUpdateDto,
+    changedByUserId?: string,
+    interviewDto?: InterviewCreateDto,
+  ) {
     const existing = await this.prisma.recruitmentStage.findUnique({
       where: { id: stageId },
       include: {
@@ -79,6 +120,8 @@ export class RecruitmentStagesService {
       throw new NotFoundException('Tahapan tidak ditemukan.');
     }
 
+    const application = existing.application;
+
     const wasInterview =
       existing.stage_type === 'HR_INTERVIEW' ||
       existing.stage_type === 'MANAGEMENT_INTERVIEW';
@@ -87,32 +130,78 @@ export class RecruitmentStagesService {
       dto.stage_type === 'HR_INTERVIEW' ||
       dto.stage_type === 'MANAGEMENT_INTERVIEW';
 
+    const finalStatuses: ApplicationStatus[] = ['ACCEPTED', 'REJECTED'];
+
     if (
-      existing.stage_type === 'CV_SCREENING' &&
-      nowInterview &&
-      existing.application.interviews.length === 0
+      dto.final_status === 'ACCEPTED' ||
+      dto.final_status === 'CONFIRMED_INTERVIEW'
     ) {
-      throw new BadRequestException(
-        'Tidak dapat mengubah dari CV Screening ke tahapan interview. Gunakan fitur "Ubah Tahapan Aktif" untuk melanjutkan.',
-      );
+      const latestInterview = await this.prisma.interview.findFirst({
+        where: { application_id: application.id },
+        orderBy: { schedule: 'desc' },
+      });
+
+      if (!latestInterview) {
+        throw new BadRequestException(
+          'Tidak dapat meloloskan kandidat yang belum memiliki jadwal interview.',
+        );
+      }
+
+      const status = application.status;
+      if (status !== 'CONFIRMED_INTERVIEW') {
+        throw new BadRequestException(
+          'Kandidat belum mengonfirmasi kehadiran interview, tidak bisa diloloskan.',
+        );
+      }
     }
 
-    if (wasInterview && !nowInterview) {
+    const requiresRepeatInterview =
+      (existing.stage_type === 'MANAGEMENT_INTERVIEW' &&
+        dto.stage_type === 'HR_INTERVIEW') ||
+      (existing.stage_type === 'HR_INTERVIEW' &&
+        dto.stage_type === 'CV_SCREENING');
+
+    if (requiresRepeatInterview && interviewDto) {
       await this.prisma.interview.deleteMany({
         where: { application_id: existing.application_id },
+      });
+
+      await this.prisma.interview.create({
+        data: {
+          application_id: existing.application_id,
+          type:
+            dto.stage_type === 'HR_INTERVIEW'
+              ? 'HR'
+              : dto.stage_type === 'MANAGEMENT_INTERVIEW'
+                ? 'MANAGEMENT'
+                : null,
+          schedule: interviewDto.schedule,
+          confirm_deadline: interviewDto.confirm_deadline,
+          method: interviewDto.method,
+          link: interviewDto.link,
+          location: interviewDto.location,
+          notes: interviewDto.notes,
+        },
       });
     }
 
     if (
       wasInterview &&
       nowInterview &&
-      existing.stage_type !== dto.stage_type
+      existing.stage_type !== dto.stage_type &&
+      !interviewDto
     ) {
       await this.prisma.interview.updateMany({
         where: { application_id: existing.application_id },
         data: {
           type: dto.stage_type === 'HR_INTERVIEW' ? 'HR' : 'MANAGEMENT',
         },
+      });
+    }
+
+    if (wasInterview && !nowInterview && !interviewDto) {
+      await this.prisma.interview.deleteMany({
+        where: { application_id: existing.application_id },
       });
     }
 
@@ -134,10 +223,36 @@ export class RecruitmentStagesService {
     });
 
     if (dto.final_status) {
+      if (!application) {
+        throw new NotFoundException('Lamaran tidak ditemukan');
+      }
+
+      if (
+        finalStatuses.includes(application.status) &&
+        dto.final_status !== application.status
+      ) {
+        throw new BadRequestException(
+          'Status final tidak dapat diubah kecuali oleh admin.',
+        );
+      }
+
+      if (application.status !== dto.final_status) {
+        await this.prisma.applicationHistory.create({
+          data: {
+            application_id: application.id,
+            changed_by: changedByUserId ?? 'SYSTEM',
+            from_status: application.status,
+            to_status: dto.final_status,
+            reason: dto.notes ?? 'Perubahan status melalui updateStage',
+          },
+        });
+      }
+
       await this.prisma.application.update({
-        where: { id: existing.application_id },
+        where: { id: application.id },
         data: {
           status: dto.final_status,
+          updated_at: new Date(),
         },
       });
     }
