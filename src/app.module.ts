@@ -18,6 +18,7 @@ import { ApplicationsModule } from './applications/applications.module';
 import { RecruitmentStagesModule } from './recruitment-stages/recruitment-stages.module';
 import { AiInterviewModule } from './ai-interview/ai-interview.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { FeedbacksModule } from './feedbacks/feedbacks.module';
     RecruitmentStagesModule,
     AiInterviewModule,
     FeedbacksModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [
