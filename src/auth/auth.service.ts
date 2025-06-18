@@ -7,11 +7,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
+import dayjs from 'dayjs';
 import { RegisterDto } from './dtos/auth.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { MailerService } from '../mailer/mailer.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AdminProfileUpdateDto } from './dtos/admin-profile-update.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -160,8 +163,8 @@ export class AuthService {
 
     if (!user || !user.password) {
       throw new HttpException(
-        'User tidak ditemukan atau belum punya password',
-        HttpStatus.NOT_FOUND,
+        'Akun ini signin menggunakan Google dan tidak memiliki password untuk diubah',
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -227,5 +230,126 @@ export class AuthService {
         ...(data.image_url && { image_url: data.image_url }),
       },
     });
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prismaService.user.findUnique({ where: { email } });
+
+    if (!user || !user.password) {
+      throw new HttpException(
+        'Akun tidak ditemukan atau tidak bisa reset password.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const token = randomUUID();
+    const expiresAt = dayjs().add(1, 'hour').toDate();
+
+    await this.prismaService.passwordResetToken.create({
+      data: {
+        user_id: user.id,
+        token,
+        expires_at: expiresAt,
+      },
+    });
+
+    const isProd = process.env.NODE_ENV === 'production';
+
+    const resetLink = isProd
+      ? `https://frontend-gunakarir.vercel.app/password/reset?token=${token}`
+      : `http://localhost:3000/password/reset?token=${token}`;
+
+    await this.mailerService.sendMailWithTemplate(
+      user.email,
+      'Reset Password GunaKarir',
+      'forgot-password',
+      {
+        username: user.username,
+        resetLink,
+      },
+    );
+
+    return {
+      message: 'Link reset password telah dikirim ke email (simulasi).',
+    };
+  }
+
+  async resendForgotPassword(email: string) {
+    const user = await this.prismaService.user.findUnique({ where: { email } });
+
+    if (!user || !user.password) {
+      throw new HttpException(
+        'Akun tidak ditemukan atau tidak bisa reset password.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.prismaService.passwordResetToken.deleteMany({
+      where: {
+        user_id: user.id,
+        used: false,
+        expires_at: { gt: new Date() },
+      },
+    });
+
+    const token = randomUUID();
+    const expiresAt = dayjs().add(1, 'hour').toDate();
+
+    await this.prismaService.passwordResetToken.create({
+      data: {
+        user_id: user.id,
+        token,
+        expires_at: expiresAt,
+      },
+    });
+
+    const isProd = process.env.NODE_ENV === 'production';
+
+    const resetLink = isProd
+      ? `https://frontend-gunakarir.vercel.app/password/reset?token=${token}`
+      : `http://localhost:3000/password/reset?token=${token}`;
+
+    await this.mailerService.sendMailWithTemplate(
+      user.email,
+      'Reset Password GunaKarir',
+      'forgot-password',
+      {
+        username: user.username,
+        resetLink,
+      },
+    );
+
+    return {
+      message: 'Link reset password berhasil dikirim ulang (simulasi).',
+    };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { token, new_password } = dto;
+
+    const resetToken = await this.prismaService.passwordResetToken.findUnique({
+      where: { token },
+    });
+
+    if (!resetToken || resetToken.used || resetToken.expires_at < new Date()) {
+      throw new HttpException(
+        'Token tidak valid atau sudah kadaluarsa',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    await this.prismaService.user.update({
+      where: { id: resetToken.user_id },
+      data: { password: hashedPassword },
+    });
+
+    await this.prismaService.passwordResetToken.update({
+      where: { token },
+      data: { used: true },
+    });
+
+    return { message: 'Password berhasil direset.' };
   }
 }

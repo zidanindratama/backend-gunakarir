@@ -77,9 +77,10 @@ model User {
   recruiter Recruiter?
   OTP       OneTimePassword[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  Feedback  Feedback[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Feedback           Feedback[]
+  PasswordResetToken PasswordResetToken[]
 }
 
 model Student {
@@ -368,4 +369,17 @@ model Feedback {
   rating  Int
 
   created_at DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @db.ObjectId
+
+  token      String   @unique
+  expires_at DateTime
+  used       Boolean  @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

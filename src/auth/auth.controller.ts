@@ -24,6 +24,7 @@ import { setAuthCookies } from '../common/utils/cookie.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { Roles } from '../common/decorators/roles.decorator';
 import { AdminProfileUpdateDto } from './dtos/admin-profile-update.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -166,6 +167,24 @@ export class AuthController {
   async changePassword(@Req() req: Request, @Body() body: ChangePasswordDto) {
     const user = req.user;
     return this.authService.changePassword(user.id, body);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Public()
+  @Post('resend-reset-password')
+  resendForgotPassword(@Body('email') email: string) {
+    return this.authService.resendForgotPassword(email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
   }
 
   @Get('me')
