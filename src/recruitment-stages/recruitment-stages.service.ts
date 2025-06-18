@@ -8,10 +8,14 @@ import { RecruitmentStageCreateDto } from './dtos/recruitment-stage-create.dto';
 import { InterviewCreateDto } from './dtos/interview-create.dto';
 import { RecruitmentStageUpdateDto } from './dtos/recruitment-stage-update.dto';
 import { ApplicationStatus } from '@prisma/client';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class RecruitmentStagesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailerService,
+  ) {}
 
   async addStage(
     applicationId: string,
@@ -27,12 +31,13 @@ export class RecruitmentStagesService {
       throw new NotFoundException('Lamaran tidak ditemukan.');
     }
 
-    const isTryingToLolos =
-      finalStatus === 'ACCEPTED' || finalStatus === 'INTERVIEW_INVITED';
+    const isTryingToLolos = finalStatus === 'ACCEPTED';
 
-    const isNotCvScreening = dto.stage_type !== 'CV_SCREENING';
+    const isStageAfterCvScreening =
+      dto.stage_type === 'HR_INTERVIEW' ||
+      dto.stage_type === 'MANAGEMENT_INTERVIEW';
 
-    if (isTryingToLolos && isNotCvScreening) {
+    if (isTryingToLolos && isStageAfterCvScreening) {
       const latestInterview = await this.prisma.interview.findFirst({
         where: { application_id: applicationId },
         orderBy: { schedule: 'desc' },
@@ -95,6 +100,22 @@ export class RecruitmentStagesService {
         },
       });
     }
+
+    const student = await this.prisma.student.findUnique({
+      where: { id: application.student_id },
+      include: { user: true },
+    });
+
+    await this.mailerService.sendMailWithTemplate(
+      student.user.email,
+      'Tahapan Rekrutmen Anda Telah Diperbarui',
+      'stage-update',
+      {
+        username: student.user.username,
+        stageType: dto.stage_type,
+        notes: dto.notes ?? '-',
+      },
+    );
 
     return stage;
   }
@@ -256,6 +277,22 @@ export class RecruitmentStagesService {
         },
       });
     }
+
+    const student = await this.prisma.student.findUnique({
+      where: { id: application.student_id },
+      include: { user: true },
+    });
+
+    await this.mailerService.sendMailWithTemplate(
+      student.user.email,
+      'Perubahan Tahapan Rekrutmen',
+      'stage-update',
+      {
+        username: student.user.username,
+        stageType: dto.stage_type,
+        notes: dto.notes ?? '-',
+      },
+    );
 
     return updatedStage;
   }
