@@ -112,8 +112,6 @@ export class AuthController {
       ? 'https://frontend-gunakarir.vercel.app/callback'
       : 'http://localhost:3000/callback';
 
-    console.log(redirectUrl);
-
     return res.redirect(redirectUrl);
   }
 

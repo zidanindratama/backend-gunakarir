@@ -90,7 +90,7 @@ export class AiInterviewService {
   async testAskQuestion(question: string): Promise<string> {
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-zero:free',
+        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
         messages: [{ role: 'user', content: question }],
       });
 
@@ -197,7 +197,7 @@ export class AiInterviewService {
 
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-zero:free',
+        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
         messages: [{ role: 'user', content: prompt }],
       });
 
@@ -233,7 +233,7 @@ export class AiInterviewService {
 
         try {
           const completion: any = await this.client.chat.completions.create({
-            model: 'deepseek/deepseek-r1-zero:free',
+            model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
             messages: [{ role: 'user', content: prompt }],
           });
 
@@ -259,7 +259,7 @@ export class AiInterviewService {
 
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-zero:free',
+        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
         messages: [{ role: 'user', content: prompt }],
       });
 
