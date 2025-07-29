@@ -90,7 +90,7 @@ export class AiInterviewService {
   async testAskQuestion(question: string): Promise<string> {
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+        model: 'google/gemma-3n-e2b-it:free',
         messages: [{ role: 'user', content: question }],
       });
 
@@ -197,7 +197,7 @@ export class AiInterviewService {
 
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+        model: 'google/gemma-3n-e2b-it:free',
         messages: [{ role: 'user', content: prompt }],
       });
 
@@ -212,9 +212,9 @@ export class AiInterviewService {
         .map((q) => q.trim())
         .filter((q) => q.length > 0 && q.endsWith('?'));
 
-      if (cleaned.length !== 5) {
+      if (cleaned.length < 3) {
         throw new BadRequestException(
-          `AI menghasilkan ${cleaned.length} pertanyaan, bukan 5.`,
+          `AI hanya menghasilkan ${cleaned.length} pertanyaan. Minimal 3 diperlukan.`,
         );
       }
 
@@ -233,7 +233,7 @@ export class AiInterviewService {
 
         try {
           const completion: any = await this.client.chat.completions.create({
-            model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+            model: 'google/gemma-3n-e2b-it:free',
             messages: [{ role: 'user', content: prompt }],
           });
 
@@ -259,7 +259,7 @@ export class AiInterviewService {
 
     try {
       const completion: any = await this.client.chat.completions.create({
-        model: 'deepseek/deepseek-r1-0528-qwen3-8b:free',
+        model: 'google/gemma-3n-e2b-it:free',
         messages: [{ role: 'user', content: prompt }],
       });
 
