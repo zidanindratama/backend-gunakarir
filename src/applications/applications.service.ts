@@ -229,6 +229,25 @@ export class ApplicationsService {
       throw new BadRequestException('Kamu sudah melamar pekerjaan ini.');
     }
 
+    const job = await this.prisma.job.findUnique({
+      where: { id: dto.job_id },
+      select: {
+        application_end: true,
+        title: true,
+      },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Lowongan tidak ditemukan.');
+    }
+
+    const now = new Date();
+    if (job.application_end < now) {
+      throw new BadRequestException(
+        `Lamaran untuk pekerjaan "${job.title}" sudah ditutup.`,
+      );
+    }
+
     return this.prisma.application.create({
       data: {
         student_id: studentId,
